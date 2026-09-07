@@ -1,12 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Upload, File, ArrowRight, ShieldCheck, Clock3 } from "lucide-react";
 import Dropzone, { type FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 import { useUploadThing } from "./lib/uploadthing";
 
 export default function ShareItLanding() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
@@ -15,25 +13,8 @@ export default function ShareItLanding() {
     },
   });
 
-  const handleBrowse = () => {
-    inputRef.current?.click();
-  };
-
   const onDropAccepted = (acceptedFiles: File[]) => {
-    toast.promise(
-      async () => {
-        await startUpload(acceptedFiles);
-      },
-      {
-        loading: "Creating link...",
-        success: "Link is ready to share",
-        error: (error) => {
-          error instanceof Error
-            ? error.message
-            : "Something went wrong, try again";
-        },
-      },
-    );
+    startUpload(acceptedFiles);
   };
 
   const onDropRejected = (rejectedFiles: FileRejection[]) => {
@@ -71,7 +52,7 @@ export default function ShareItLanding() {
           Links expire after 5 minutes
         </div>
 
-        <h1 className="max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl text-white">
+        <h1 className="max-w-3xl text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl text-white">
           Send big files.
           <br />
           <span className="text-zinc-400">Keep it simple.</span>
@@ -90,60 +71,28 @@ export default function ShareItLanding() {
             onDropRejected={onDropRejected}
           >
             {({ getRootProps, getInputProps }) => (
-              <div {...getRootProps()} className="mt-12 w-full max-w-2xl">
-                <input ref={inputRef} {...getInputProps()} className="hidden" />
+              <div
+                {...getRootProps()}
+                className="mt-12 w-full h-100 border-2 border-dashed rounded-xl flex flex-col justify-center items-center border-white gap-2"
+              >
+                <input {...getInputProps()} className="absolute" />
 
-                <button
-                  type="button"
-                  onClick={handleBrowse}
-                  onDragEnter={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
+                <div className="grid size-16 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 transition-transform ease-in-out duration-500 group-hover:-translate-y-1">
+                  <Upload className="size-7 text-zinc-700" />
+                </div>
 
-                    // Placeholder:
-                    // const files = Array.from(e.dataTransfer.files);
-                    // uploadFiles(files);
-                  }}
-                  className={`
-              group relative flex min-h-80 w-full cursor-pointer
-              flex-col items-center justify-center rounded-3xl
-              border-2 border-dashed p-8 transition-all duration-500 ease-in-out
-              ${
-                isDragging
-                  ? "border-zinc-100 bg-zinc-950 scale-[1.01]"
-                  : "border-zinc-100 bg-zinc-800 hover:border-zinc-100 hover:bg-zinc-900"
-              }
-            `}
-                >
-                  <div className="mb-6 grid size-16 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 transition-transform ease-in-out duration-500 group-hover:-translate-y-1">
-                    <Upload className="size-7 text-zinc-700" />
-                  </div>
+                <h2 className="text-xl font-semibold text-white">
+                  Drop your files here
+                </h2>
 
-                  <h2 className="text-xl font-semibold text-white">
-                    Drop your files here
-                  </h2>
+                <p className="mt-2 text-sm text-zinc-500">
+                  or click to browse your device
+                </p>
 
-                  <p className="mt-2 text-sm text-zinc-500">
-                    or click to browse your device
-                  </p>
-
-                  <div className="mt-7 flex items-center gap-2 text-xs text-zinc-400">
-                    <File className="size-3.5" />
-                    Up to 200 MB per file
-                  </div>
-                </button>
+                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <File className="size-3.5" />
+                  Up to 200 MB per file
+                </div>
               </div>
             )}
           </Dropzone>
